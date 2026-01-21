@@ -88,17 +88,17 @@ export const notificationsAPI = {
     params.append("page", page.toString());
     params.append("limit", limit.toString());
     if (isRead !== undefined) params.append("isRead", isRead.toString());
-    return client.get(`/notification?${params.toString()}`);
+    return client.get(`/notifications?${params.toString()}`);
   },
 
   markAsRead: async (notificationId: string) => {
     const client = await getApiClient();
-    return client.patch(`/notification/${notificationId}/read`);
+    return client.patch(`/notifications/${notificationId}/read`);
   },
 
   markAllAsRead: async () => {
     const client = await getApiClient();
-    return client.patch("/notification/read-all");
+    return client.patch("/notifications/read-all");
   },
 };
 
