@@ -8,6 +8,7 @@
     "lint": "eslint .",
     "start": "next start"
   },
+  
   "dependencies": {
     "@auth/core": "latest",
     "@hookform/resolvers": "^3.10.0",

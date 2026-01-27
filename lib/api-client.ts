@@ -207,7 +207,7 @@ export const categoriesAPI = {
     params.append("page", page.toString());
     params.append("limit", limit.toString());
     if (search) params.append("search", search);
-    return client.get(`/category?${params.toString()}`);
+    return client.get(`/category/admin/all?${params.toString()}`);
   },
 
   getCategoryById: async (id: string) => {
@@ -215,14 +215,22 @@ export const categoriesAPI = {
     return client.get(`/category/${id}`);
   },
 
-  createCategory: async (data: any) => {
+  createCategory: async (data: FormData) => {
     const client = await getApiClient();
-    return client.post("/category", data);
+    return client.post("/category", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   },
 
-  updateCategory: async (id: string, data: any) => {
+  updateCategory: async (id: string, data: FormData | any) => {
     const client = await getApiClient();
-    return client.patch(`/category/${id}`, data);
+    // If data is FormData, set correct headers
+    const config = data instanceof FormData 
+      ? { headers: { "Content-Type": "multipart/form-data" } }
+      : {};
+    return client.patch(`/category/${id}`, data, config);
   },
 
   deleteCategory: async (id: string) => {

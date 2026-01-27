@@ -36,7 +36,11 @@ export default function CategoriesPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [isAddingCategory, setIsAddingCategory] = useState(false);
-  const [newCategory, setNewCategory] = useState({ name: "", icon: "" });
+  const [isEditingCategory, setIsEditingCategory] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [newCategory, setNewCategory] = useState({ speciality_name: "" });
+  const [editingCategory, setEditingCategory] = useState<any>(null);
+
   const queryClient = useQueryClient();
   const ITEMS_PER_PAGE = 10;
 
@@ -51,7 +55,8 @@ export default function CategoriesPage() {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast.success("Category created successfully");
       setIsAddingCategory(false);
-      setNewCategory({ name: "", icon: "" });
+      setNewCategory({ speciality_name: "" });
+      setSelectedFile(null);
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to create category");
@@ -64,6 +69,9 @@ export default function CategoriesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast.success("Category updated successfully");
+      setIsEditingCategory(false);
+      setEditingCategory(null);
+      setSelectedFile(null);
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to update category");
@@ -82,16 +90,55 @@ export default function CategoriesPage() {
   });
 
   const categories = response?.data?.data || [];
-  const totalResults = response?.data?.pagination?.total || 0;
+  const totalResults = response?.data?.total || categories.length; // Backend might send total separately
   const totalPages = Math.ceil(totalResults / ITEMS_PER_PAGE);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
 
   const handleAddCategory = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCategory.name) {
+    if (!newCategory.speciality_name) {
       toast.error("Please enter category name");
       return;
     }
-    createMutation.mutate(newCategory);
+    
+    const formData = new FormData();
+    formData.append("speciality_name", newCategory.speciality_name);
+    if (selectedFile) {
+      formData.append("category_image", selectedFile);
+    }
+    
+    createMutation.mutate(formData);
+  };
+
+  const handleUpdateCategory = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCategory?.speciality_name) {
+      toast.error("Please enter category name");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("speciality_name", editingCategory.speciality_name);
+    formData.append("status", editingCategory.status);
+    if (selectedFile) {
+      formData.append("category_image", selectedFile);
+    }
+
+    updateMutation.mutate({
+      id: editingCategory._id,
+      data: formData,
+    });
+  };
+
+  const handleEditClick = (category: any) => {
+    setEditingCategory({ ...category });
+    setIsEditingCategory(true);
+    setSelectedFile(null);
   };
 
   return (
@@ -121,21 +168,19 @@ export default function CategoriesPage() {
                   <Input
                     id="name"
                     placeholder="e.g., Cardiology"
-                    value={newCategory.name}
+                    value={newCategory.speciality_name}
                     onChange={(e) =>
-                      setNewCategory({ ...newCategory, name: e.target.value })
+                      setNewCategory({ ...newCategory, speciality_name: e.target.value })
                     }
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="icon">Icon URL</Label>
+                  <Label htmlFor="image">Category Image</Label>
                   <Input
-                    id="icon"
-                    placeholder="https://example.com/icon.png"
-                    value={newCategory.icon}
-                    onChange={(e) =>
-                      setNewCategory({ ...newCategory, icon: e.target.value })
-                    }
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
                   />
                 </div>
                 <Button
@@ -194,26 +239,26 @@ export default function CategoriesPage() {
                       <TableRow key={category._id}>
                         <TableCell>{(page - 1) * ITEMS_PER_PAGE + index + 1}</TableCell>
                         <TableCell>
-                          {category.icon ? (
+                          {category.category_image_url ? (
                             <img
-                              src={category.icon || "/placeholder.svg"}
-                              alt={category.name}
-                              className="h-8 w-8 rounded"
+                              src={category.category_image_url || "/placeholder.svg"}
+                              alt={category.speciality_name}
+                              className="h-8 w-8 rounded object-cover"
                             />
                           ) : (
                             <div className="h-8 w-8 bg-gray-200 rounded" />
                           )}
                         </TableCell>
-                        <TableCell className="font-medium">{category.name}</TableCell>
+                        <TableCell className="font-medium">{category.speciality_name}</TableCell>
                         <TableCell>
                           <Badge
                             className={
-                              category.isActive
+                              category.status
                                 ? "bg-purple-100 text-purple-800"
                                 : "bg-gray-100 text-gray-800"
                             }
                           >
-                            {category.isActive ? "Active" : "Inactive"}
+                            {category.status ? "Active" : "Inactive"}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -224,18 +269,22 @@ export default function CategoriesPage() {
                               onClick={() =>
                                 updateMutation.mutate({
                                   id: category._id,
-                                  data: { isActive: !category.isActive },
+                                  data: { status: !category.status },
                                 })
                               }
                               disabled={updateMutation.isPending}
                             >
-                              {category.isActive ? (
+                              {category.status ? (
                                 <Toggle2On className="h-4 w-4 text-purple-600" />
                               ) : (
                                 <Toggle2Off className="h-4 w-4 text-gray-400" />
                               )}
                             </Button>
-                            <Button size="sm" variant="ghost">
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => handleEditClick(category)}
+                            >
                               <Edit2 className="h-4 w-4 text-blue-600" />
                             </Button>
                             <Button
@@ -260,6 +309,54 @@ export default function CategoriesPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Edit Category Dialog */}
+        <Dialog open={isEditingCategory} onOpenChange={setIsEditingCategory}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Category</DialogTitle>
+              <DialogDescription>Update the category details</DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleUpdateCategory} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Category Name</Label>
+                <Input
+                  id="edit-name"
+                  placeholder="e.g., Cardiology"
+                  value={editingCategory?.speciality_name || ""}
+                  onChange={(e) =>
+                    setEditingCategory({ ...editingCategory, speciality_name: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-image">Category Image</Label>
+                <div className="flex items-center gap-4">
+                  {editingCategory?.category_image_url && !selectedFile && (
+                    <img 
+                      src={editingCategory.category_image_url} 
+                      alt="Current" 
+                      className="h-10 w-10 rounded object-cover" 
+                    />
+                  )}
+                  <Input
+                    id="edit-image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                </div>
+              </div>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={updateMutation.isPending}
+              >
+                {updateMutation.isPending ? "Updating..." : "Update Category"}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
 
         {/* Pagination */}
         {totalPages > 1 && (

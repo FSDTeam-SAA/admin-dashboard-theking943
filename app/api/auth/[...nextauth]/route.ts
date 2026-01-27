@@ -3,12 +3,12 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import type { JWT } from "next-auth/jwt";
 import axios from "axios";
 
-const baseURL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3001/api";
+const baseURL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5005/api/v1";
 const TOKEN_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 async function refreshAccessToken(token: JWT) {
   try {
-    const response = await axios.post(`${baseURL}/auth/reset-refresh-token`, {
+    const response = await axios.post(`${baseURL}/auth/refresh-token`, {
       refreshToken: token.refreshToken,
     });
     const { accessToken, refreshToken } = response.data.data;
@@ -55,8 +55,8 @@ export const authOptions: NextAuthOptions = {
           return {
             id: user._id || user.id,
             email: user.email,
-            name: user.firstName + " " + user.lastName,
-            image: user.profileImage || "",
+            name: user.fullName || user.username || "Admin",
+            image: user.avatar?.url || "",
             accessToken,
             refreshToken,
           };
