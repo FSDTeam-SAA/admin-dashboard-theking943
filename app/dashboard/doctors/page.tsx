@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,8 +30,26 @@ import {
 import { doctorsAPI } from "@/lib/api-client";
 import { TableSkeleton } from "@/components/skeletons";
 import { toast } from "sonner";
-import { Search, Eye, CheckCircle, XCircle } from "lucide-react";
+import {
+  Search,
+  Eye,
+  CheckCircle,
+  XCircle,
+  Mail,
+  Phone,
+  MapPin,
+  Star,
+  Briefcase,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { Suspense } from "react";
 import Loading from "../appointments/loading";
 
@@ -33,18 +57,32 @@ export default function DoctorsPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const queryClient = useQueryClient();
   const ITEMS_PER_PAGE = 10;
-
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["doctors", page, search, status],
     queryFn: () => doctorsAPI.getDoctors(page, ITEMS_PER_PAGE, search, status),
   });
 
+  const { data: detailResponse, isFetching: isDetailLoading } = useQuery({
+    queryKey: ["doctor-detail", selectedId],
+    queryFn: () => doctorsAPI.getDoctorById(selectedId || ""),
+    enabled: Boolean(selectedId) && isDetailOpen,
+  });
+
+  const doctorDetail = detailResponse?.data?.data || null;
+
   const approveMutation = useMutation({
-    mutationFn: ({ id, approvalStatus }: { id: string; approvalStatus: string }) =>
-      doctorsAPI.approveDoctorRegistration(id, approvalStatus),
+    mutationFn: ({
+      id,
+      approvalStatus,
+    }: {
+      id: string;
+      approvalStatus: string;
+    }) => doctorsAPI.approveDoctorRegistration(id, approvalStatus),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["doctors"] });
       toast.success("Doctor status updated");
@@ -76,8 +114,12 @@ export default function DoctorsPage() {
       <div className="space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Doctor's Management</h1>
-          <p className="text-gray-600 mt-2">Manage all doctors, approve registrations, and edit profiles</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Doctor's Management
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Manage all doctors, approve registrations, and edit profiles
+          </p>
         </div>
 
         {/* Filters */}
@@ -96,10 +138,13 @@ export default function DoctorsPage() {
                   }}
                 />
               </div>
-              <Select value={status} onValueChange={(val) => {
-                setStatus(val);
-                setPage(1);
-              }}>
+              <Select
+                value={status}
+                onValueChange={(val) => {
+                  setStatus(val);
+                  setPage(1);
+                }}
+              >
                 <SelectTrigger className="w-full md:w-48">
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
@@ -118,7 +163,9 @@ export default function DoctorsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Doctor's List</CardTitle>
-            <CardDescription>Showing {doctors.length} of {totalResults} results</CardDescription>
+            <CardDescription>
+              Showing {doctors.length} of {totalResults} results
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -132,6 +179,7 @@ export default function DoctorsPage() {
                       <TableHead>Specialty</TableHead>
                       <TableHead>Contact</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Referral</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -141,23 +189,43 @@ export default function DoctorsPage() {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">
-                              <AvatarImage src={doctor.avatar?.url || "/placeholder.svg"} alt={doctor.fullName} />
-                              <AvatarFallback>{doctor.fullName.charAt(0)}</AvatarFallback>
+                              <AvatarImage
+                                src={doctor.avatar?.url || "/placeholder.svg"}
+                                alt={doctor.fullName}
+                              />
+                              <AvatarFallback>
+                                {doctor.fullName.charAt(0)}
+                              </AvatarFallback>
                             </Avatar>
                             <div>
                               <p className="font-medium">{doctor.fullName}</p>
-                              <p className="text-xs text-gray-600">{doctor.email}</p>
+                              <p className="text-xs text-gray-600">
+                                {doctor.email}
+                              </p>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline">{doctor.specialty || doctor.specialties?.[0] || "N/A"}</Badge>
+                          <Badge variant="outline">
+                            {doctor.specialty ||
+                              doctor.specialties?.[0] ||
+                              "N/A"}
+                          </Badge>
                         </TableCell>
-                        <TableCell className="text-sm">{doctor.email}</TableCell>
+                        <TableCell className="text-sm">
+                          {doctor.email}
+                        </TableCell>
                         <TableCell>
-                          <Badge className={getStatusColor(doctor.approvalStatus)}>
+                          <Badge
+                            className={getStatusColor(doctor.approvalStatus)}
+                          >
                             {doctor.approvalStatus?.charAt(0).toUpperCase() +
                               doctor.approvalStatus?.slice(1)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">
+                            {doctor.referralCode}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -196,7 +264,14 @@ export default function DoctorsPage() {
                                 </Button>
                               </>
                             )}
-                            <Button size="sm" variant="ghost">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setSelectedId(doctor._id);
+                                setIsDetailOpen(true);
+                              }}
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
                           </div>
@@ -223,14 +298,14 @@ export default function DoctorsPage() {
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                onClick={() => setPage(p => Math.max(1, p - 1))}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
               >
                 Previous
               </Button>
               <Button
                 variant="outline"
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
               >
                 Next
@@ -239,6 +314,150 @@ export default function DoctorsPage() {
           </div>
         )}
       </div>
+
+      {/* Detail modal */}
+      <Dialog
+        open={isDetailOpen}
+        onOpenChange={(open) => {
+          setIsDetailOpen(open);
+          if (!open) setSelectedId(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Doctor Details</DialogTitle>
+            <DialogDescription>
+              Profile and professional info at a glance.
+            </DialogDescription>
+          </DialogHeader>
+
+          {isDetailLoading ? (
+            <div className="py-6 text-sm text-gray-500">Loading...</div>
+          ) : doctorDetail ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-14 w-14">
+                  <AvatarImage
+                    src={doctorDetail.avatar?.url || "/placeholder.svg"}
+                    alt={doctorDetail.fullName}
+                  />
+                  <AvatarFallback>
+                    {doctorDetail.fullName?.charAt(0) || "D"}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-xl font-semibold flex items-center gap-2">
+                    {doctorDetail.fullName || "N/A"}
+                  </p>
+                  <p className="text-sm text-gray-600 flex items-center gap-2">
+                    <Mail className="h-4 w-4" /> {doctorDetail.email || "—"}
+                  </p>
+                  {doctorDetail.phone && (
+                    <p className="text-sm text-gray-600 flex items-center gap-2">
+                      <Phone className="h-4 w-4" /> {doctorDetail.phone}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-500">Specialty</p>
+                  <p className="font-medium">
+                    {doctorDetail.specialty ||
+                      doctorDetail.specialties?.[0] ||
+                      "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Experience</p>
+                  <p className="font-medium">
+                    {doctorDetail.experienceYears || 0} yrs
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500">License</p>
+                  <p className="font-medium">
+                    {doctorDetail.medicalLicenseNumber || "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Fees</p>
+                  <p className="font-medium">
+                    {doctorDetail.fees?.amount ?? 0}{" "}
+                    {doctorDetail.fees?.currency || "USD"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Status</p>
+                  <p className="font-medium capitalize">
+                    {doctorDetail.approvalStatus || "pending"}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Star className="h-4 w-4 text-amber-500" />
+                  <div>
+                    <p className="text-gray-500">Rating</p>
+                    <p className="font-medium">
+                      {doctorDetail.ratingSummary?.avgRating ?? 0} / 5 •{" "}
+                      {doctorDetail.ratingSummary?.totalReviews ?? 0} reviews
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {doctorDetail.address && (
+                <div className="flex items-start gap-2 text-sm">
+                  <MapPin className="h-4 w-4 mt-1 text-gray-500" />
+                  <div>
+                    <p className="text-gray-500">Address</p>
+                    <p className="font-medium">{doctorDetail.address}</p>
+                  </div>
+                </div>
+              )}
+
+              {doctorDetail.bio && (
+                <div className="text-sm space-y-1">
+                  <div className="flex items-center gap-2 text-gray-500">
+                    <Briefcase className="h-4 w-4" /> Bio
+                  </div>
+                  <p className="font-medium leading-relaxed">
+                    {doctorDetail.bio}
+                  </p>
+                </div>
+              )}
+
+              {doctorDetail.weeklySchedule?.length ? (
+                <div className="text-sm space-y-2">
+                  <p className="text-gray-500 font-medium">Weekly Schedule</p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {doctorDetail.weeklySchedule.map((day: any) => (
+                      <div key={day.day} className="border rounded-lg p-3">
+                        <p className="text-xs uppercase tracking-wide text-gray-500">
+                          {day.day}
+                        </p>
+                        {day.isActive && day.slots?.length ? (
+                          day.slots.map((slot: any, idx: number) => (
+                            <p key={idx} className="font-medium">
+                              {slot.start} - {slot.end}
+                            </p>
+                          ))
+                        ) : (
+                          <p className="text-xs text-gray-500">No slots</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <div className="py-6 text-sm text-gray-500">No details found</div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Suspense>
   );
 }

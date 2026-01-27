@@ -48,6 +48,7 @@ export function DashboardSidebar() {
     { name: "Doctor's", icon: UserCog, href: "/dashboard/doctors" },
     { name: "Earnings", icon: Wallet, href: "/dashboard/earnings" },
     { name: "Patients", icon: Users, href: "/dashboard/patients" },
+    { name: "Referral Code", icon: Users, href: "/dashboard/referral" },
     { name: "Appointments", icon: Calendar, href: "/dashboard/appointments" },
     { name: "Category", icon: LayoutGrid, href: "/dashboard/categories" },
   ];

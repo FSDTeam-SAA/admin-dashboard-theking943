@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { authAPI } from "@/lib/api-client";
 import Loading from "./loading";
+import Image from "next/image";
 
 export default function VerifyOTPPage() {
   const router = useRouter();
@@ -41,7 +42,10 @@ export default function VerifyOTPPage() {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number,
+  ) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
@@ -103,20 +107,26 @@ export default function VerifyOTPPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 flex items-center justify-center p-4">
       <Suspense fallback={<Loading />}>
         <div className="w-full max-w-md">
-          {/* Logo */}
-          <div className="flex justify-center mb-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <span className="text-white text-3xl font-bold">+</span>
-              </div>
-              <h1 className="text-3xl font-bold text-blue-600">Docmobi</h1>
-            </div>
-          </div>
-
           {/* Content */}
           <div className="bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-blue-600 mb-2 text-center">Enter OTP</h2>
-            <p className="text-gray-600 text-center mb-6">Enter the 6-digit code sent to your Email Address</p>
+            {/* Logo */}
+            <div className="flex justify-center mb-8">
+              <div className="relative w-32 h-20 flex items-center justify-center mx-auto">
+                <Image
+                  src="/logo.png"
+                  alt="Docmobi Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-blue-600 mb-2 text-center">
+              Enter OTP
+            </h2>
+            <p className="text-gray-600 text-center mb-6">
+              Enter the 6-digit code sent to your Email Address
+            </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* OTP Inputs */}
@@ -144,7 +154,9 @@ export default function VerifyOTPPage() {
                 <p className="text-gray-600 text-sm">
                   Didn't Receive OTP?{" "}
                   {timeLeft > 0 ? (
-                    <span className="text-gray-500">Resend in {formatTime(timeLeft)}</span>
+                    <span className="text-gray-500">
+                      Resend in {formatTime(timeLeft)}
+                    </span>
                   ) : (
                     <button
                       type="button"

@@ -5,12 +5,19 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { signIn } from "next-auth/react";
+import Image from "next/image";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -68,13 +75,18 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-2 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">+</span>
-            </div>
+          <div className="relative w-32 h-20 flex items-center justify-center mx-auto">
+            <Image
+              src="/logo.png"
+              alt="Docmobi Logo"
+              fill
+              className="object-contain"
+              priority
+            />
           </div>
-          <CardTitle className="text-2xl font-bold">Docmobi</CardTitle>
-          <CardDescription>Welcome back to your admin dashboard</CardDescription>
+          <CardDescription>
+            Welcome back to your admin dashboard
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -117,18 +129,30 @@ export default function LoginPage() {
                 <Checkbox
                   id="remember"
                   checked={rememberMe}
-                  onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                  onCheckedChange={(checked) =>
+                    setRememberMe(checked as boolean)
+                  }
                 />
-                <label htmlFor="remember" className="text-sm text-gray-600 cursor-pointer">
+                <label
+                  htmlFor="remember"
+                  className="text-sm text-gray-600 cursor-pointer"
+                >
                   Remember me
                 </label>
               </div>
-              <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
+              <Link
+                href="/forgot-password"
+                className="text-sm text-blue-600 hover:text-blue-700"
+              >
                 Forgot password?
               </Link>
             </div>
 
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700"
+              disabled={isLoading}
+            >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isLoading ? "Logging in..." : "Log In"}
             </Button>

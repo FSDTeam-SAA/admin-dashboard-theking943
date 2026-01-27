@@ -24,8 +24,16 @@ import {
 import { patientsAPI } from "@/lib/api-client";
 import { TableSkeleton } from "@/components/skeletons";
 import { toast } from "sonner";
-import { Search, Eye, Check, X } from "lucide-react";
+import { Search, Eye, Check, X, Mail, Phone, MapPin, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { Suspense } from "react";
 import Loading from "../appointments/loading";
 
@@ -33,6 +41,8 @@ export default function PatientsPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all"); // Updated default value to "all"
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const queryClient = useQueryClient();
   const ITEMS_PER_PAGE = 10;
 
@@ -56,6 +66,17 @@ export default function PatientsPage() {
   const patients = response?.data?.data || [];
   const totalResults = response?.data?.pagination?.total || 0;
   const totalPages = Math.ceil(totalResults / ITEMS_PER_PAGE);
+
+  const {
+    data: detailResponse,
+    isFetching: isDetailLoading,
+  } = useQuery({
+    queryKey: ["patient-detail", selectedId],
+    queryFn: () => patientsAPI.getPatientById(selectedId || ""),
+    enabled: Boolean(selectedId) && isDetailOpen,
+  });
+
+  const patientDetail = detailResponse?.data?.data || null;
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -193,7 +214,14 @@ export default function PatientsPage() {
                                 Unblock
                               </Button>
                             )}
-                            <Button size="sm" variant="ghost">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setSelectedId(patient._id);
+                                setIsDetailOpen(true);
+                              }}
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
                           </div>
@@ -236,6 +264,85 @@ export default function PatientsPage() {
           </div>
         )}
       </div>
+
+      {/* Detail modal */}
+      <Dialog
+        open={isDetailOpen}
+        onOpenChange={(open) => {
+          setIsDetailOpen(open);
+          if (!open) setSelectedId(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Patient Details</DialogTitle>
+            <DialogDescription>
+              Quick view of patient profile information.
+            </DialogDescription>
+          </DialogHeader>
+
+          {isDetailLoading ? (
+            <div className="py-6 text-sm text-gray-500">Loading...</div>
+          ) : patientDetail ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={patientDetail.avatar?.url || "/placeholder.svg"} alt={patientDetail.fullName} />
+                  <AvatarFallback>{patientDetail.fullName?.charAt(0) || "P"}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-lg font-semibold flex items-center gap-2">
+                    <User className="h-4 w-4 text-gray-500" /> {patientDetail.fullName || "N/A"}
+                  </p>
+                  <p className="text-sm text-gray-600 flex items-center gap-2">
+                    <Mail className="h-4 w-4" /> {patientDetail.email || "—"}
+                  </p>
+                  {patientDetail.phone && (
+                    <p className="text-sm text-gray-600 flex items-center gap-2">
+                      <Phone className="h-4 w-4" /> {patientDetail.phone}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-500">Status</p>
+                  <p className="font-medium capitalize">{patientDetail.status || "active"}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Language</p>
+                  <p className="font-medium">{patientDetail.language || "en"}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Role</p>
+                  <p className="font-medium capitalize">{patientDetail.role || "patient"}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Created</p>
+                  <p className="font-medium">
+                    {patientDetail.createdAt ? new Date(patientDetail.createdAt).toLocaleString() : "—"}
+                  </p>
+                </div>
+              </div>
+
+              {patientDetail.address && (
+                <div className="flex items-start gap-2 text-sm">
+                  <MapPin className="h-4 w-4 mt-1 text-gray-500" />
+                  <div>
+                    <p className="text-gray-500">Address</p>
+                    <p className="font-medium">{patientDetail.address}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="py-6 text-sm text-gray-500">No details found</div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Suspense>
   );
 }

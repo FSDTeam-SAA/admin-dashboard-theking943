@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useEffect, useState } from "react";
 import { Suspense } from "react";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
 import { authAPI } from "@/lib/api-client";
 import Loading from "./loading";
+import Image from "next/image";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -75,25 +76,33 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 flex items-center justify-center p-4">
       <Suspense fallback={<Loading />}>
         <div className="w-full max-w-md">
-          {/* Logo */}
-          <div className="flex justify-center mb-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <span className="text-white text-3xl font-bold">+</span>
-              </div>
-              <h1 className="text-3xl font-bold text-blue-600">Docmobi</h1>
-            </div>
-          </div>
-
           {/* Content */}
           <div className="bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-blue-600 mb-2 text-center">Reset Password</h2>
-            <p className="text-gray-600 text-center mb-6">Enter your new password below</p>
+            {/* Logo */}
+            <div className="flex justify-center">
+              <div className="relative w-32 h-20 flex items-center justify-center mx-auto">
+                <Image
+                  src="/logo.png"
+                  alt="Docmobi Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-blue-600 mb-2 text-center">
+              Reset Password
+            </h2>
+            <p className="text-gray-600 text-center mb-6">
+              Enter your new password below
+            </p>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* New Password Field */}
               <div>
-                <label className="block text-gray-700 font-medium mb-2">New Password</label>
+                <label className="block text-gray-700 font-medium mb-2">
+                  New Password
+                </label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -114,7 +123,9 @@ export default function ResetPasswordPage() {
 
               {/* Confirm Password Field */}
               <div>
-                <label className="block text-gray-700 font-medium mb-2">Confirm Password</label>
+                <label className="block text-gray-700 font-medium mb-2">
+                  Confirm Password
+                </label>
                 <div className="relative">
                   <input
                     type={showConfirmPassword ? "text" : "password"}
@@ -128,21 +139,36 @@ export default function ResetPasswordPage() {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
                   >
-                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    {showConfirmPassword ? (
+                      <EyeOff size={20} />
+                    ) : (
+                      <Eye size={20} />
+                    )}
                   </button>
                 </div>
-                {password && confirmPassword && password !== confirmPassword && (
-                  <p className="text-red-500 text-sm mt-1">Passwords do not match</p>
-                )}
+                {password &&
+                  confirmPassword &&
+                  password !== confirmPassword && (
+                    <p className="text-red-500 text-sm mt-1">
+                      Passwords do not match
+                    </p>
+                  )}
                 {password && validatePassword(password) && (
-                  <p className="text-red-500 text-sm mt-1">{validatePassword(password)}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {validatePassword(password)}
+                  </p>
                 )}
               </div>
 
               {/* Submit Button */}
               <Button
                 type="submit"
-                disabled={isLoading || !password || !confirmPassword || password !== confirmPassword}
+                disabled={
+                  isLoading ||
+                  !password ||
+                  !confirmPassword ||
+                  password !== confirmPassword
+                }
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
               >
                 {isLoading ? "Resetting..." : "Continue"}

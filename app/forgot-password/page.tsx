@@ -4,11 +4,18 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { authAPI } from "@/lib/api-client";
 import { toast } from "sonner";
 import { Loader2, ArrowLeft } from "lucide-react";
+import Image from "next/image";
 
 export default function ForgotPasswordPage() {
   const [step, setStep] = useState<"email" | "otp" | "password">("email");
@@ -94,12 +101,15 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-2 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">+</span>
-            </div>
+          <div className="relative w-32 h-20 flex items-center justify-center mx-auto">
+            <Image
+              src="/logo.png"
+              alt="Docmobi Logo"
+              fill
+              className="object-contain"
+              priority
+            />
           </div>
-          <CardTitle className="text-2xl font-bold">Docmobi</CardTitle>
           <CardDescription>Reset your password</CardDescription>
         </CardHeader>
         <CardContent>
@@ -116,8 +126,14 @@ export default function ForgotPasswordPage() {
                   disabled={isLoading}
                 />
               </div>
-              <p className="text-sm text-gray-600">We'll send a verification code to your email address.</p>
-              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+              <p className="text-sm text-gray-600">
+                We'll send a verification code to your email address.
+              </p>
+              <Button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                disabled={isLoading}
+              >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Send OTP
               </Button>
@@ -133,13 +149,21 @@ export default function ForgotPasswordPage() {
                   type="text"
                   placeholder="Enter 6-digit code"
                   value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  onChange={(e) =>
+                    setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                  }
                   disabled={isLoading}
                   maxLength={6}
                 />
               </div>
-              <p className="text-sm text-gray-600">Enter the 6-digit code sent to your email address.</p>
-              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+              <p className="text-sm text-gray-600">
+                Enter the 6-digit code sent to your email address.
+              </p>
+              <Button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                disabled={isLoading}
+              >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Verify OTP
               </Button>
@@ -179,7 +203,11 @@ export default function ForgotPasswordPage() {
                   disabled={isLoading}
                 />
               </div>
-              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                disabled={isLoading}
+              >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Reset Password
               </Button>
@@ -196,7 +224,10 @@ export default function ForgotPasswordPage() {
           )}
 
           <div className="mt-4 text-center">
-            <Link href="/login" className="text-sm text-blue-600 hover:text-blue-700">
+            <Link
+              href="/login"
+              className="text-sm text-blue-600 hover:text-blue-700"
+            >
               Back to login
             </Link>
           </div>

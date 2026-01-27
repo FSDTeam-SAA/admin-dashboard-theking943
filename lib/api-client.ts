@@ -246,3 +246,34 @@ export const earningsAPI = {
     return client.get("/appointment/earnings/overview");
   },
 };
+
+// Referral Codes APIs
+export const referralAPI = {
+  getReferralCodes: async (status = "") => {
+    const client = await getApiClient();
+    const params = new URLSearchParams();
+    if (status) params.append("status", status);
+    const query = params.toString();
+    return client.get(query ? `/referral?${query}` : "/referral");
+  },
+
+  createReferralCode: async (data: any) => {
+    const client = await getApiClient();
+    return client.post("/referral", data);
+  },
+
+  updateReferralCode: async (id: string, data: any) => {
+    const client = await getApiClient();
+    return client.patch(`/referral/${id}`, data);
+  },
+
+  updateReferralStatus: async (id: string, isActive: boolean) => {
+    const client = await getApiClient();
+    return client.patch(`/referral/${id}/status`, { isActive });
+  },
+
+  deleteReferralCode: async (id: string) => {
+    const client = await getApiClient();
+    return client.delete(`/referral/${id}`);
+  },
+};
