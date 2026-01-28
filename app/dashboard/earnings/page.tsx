@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -24,6 +23,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import Image from "next/image";
 
 export default function EarningsPage() {
   const [page, setPage] = useState(1);
@@ -40,12 +40,13 @@ export default function EarningsPage() {
   const stats = [
     {
       title: "Total Earnings",
-      value: `$${dashboardData?.totalEarnings?.toLocaleString() || "0.00"}`,
+      value: `${dashboardData?.totalEarnings?.toLocaleString() || "0.00"}`,
       change: "+ 36%", // Static for UI matching, or dashboardData?.earningsChange
-      icon: DollarSign,
+      icon: "",
       color: "bg-[#E6F9F1]", // Light green
       iconColor: "text-[#22C55E]",
       borderColor: "border-b-4 border-green-500",
+      image: "/Algerian-dinar.png",
     },
     {
       title: "Appointments",
@@ -55,15 +56,17 @@ export default function EarningsPage() {
       color: "bg-[#F3E8FF]", // Light purple
       iconColor: "text-[#A855F7]",
       borderColor: "border-b-4 border-purple-500",
+      image: "",
     },
     {
       title: "Avg per Doctor",
-      value: `$${dashboardData?.avgPerDoctor?.toFixed(2) || "0.00"}`,
+      value: `${dashboardData?.avgPerDoctor?.toFixed(2) || "0.00"}`,
       change: "- 14%",
       icon: Users,
       color: "bg-[#FFEFED]", // Light red/pink
       iconColor: "text-[#F87171]",
       borderColor: "border-b-4 border-red-400",
+      image: "/Algerian-dinar.png",
     },
   ];
 
@@ -112,17 +115,17 @@ export default function EarningsPage() {
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       <div className={`${stat.color} p-2 rounded-lg`}>
-                        <stat.icon className={`${stat.iconColor} h-5 w-5`} />
+                        {stat.icon ? <stat.icon className={`${stat.iconColor} h -5 w-5`} /> : <img src={stat.image} alt="" className="h-5 w-5" />}
                       </div>
                       <span className="text-sm font-medium text-slate-500">
                         {stat.title}
                       </span>
                     </div>
                     <div>
-                      <h2 className="text-3xl font-bold text-slate-900">
-                        {stat.value}
+                      <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-2">
+                       {stat.image && <Image src={stat.image} alt="" className="h-6 w-6" width={32} height={32} /> }{stat.value}
                       </h2>
-                      <div className="flex items-center mt-1">
+                      {/* <div className="flex items-center mt-1">
                         <span
                           className={`text-xs font-bold ${stat.change.includes("+") ? "text-green-500" : "text-red-500"}`}
                         >
@@ -131,7 +134,7 @@ export default function EarningsPage() {
                         <span className="text-[10px] text-slate-400 ml-2 uppercase font-semibold">
                           This Month
                         </span>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>
