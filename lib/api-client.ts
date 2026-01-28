@@ -262,26 +262,28 @@ export const referralAPI = {
     const params = new URLSearchParams();
     if (status) params.append("status", status);
     const query = params.toString();
-    return client.get(query ? `/referral?${query}` : "/referral");
+    return client.get(query ? `/referral/get-referral-codes?${query}` : "/referral/get-referral-codes");
   },
 
   createReferralCode: async (data: any) => {
     const client = await getApiClient();
-    return client.post("/referral", data);
+    return client.post("/referral/create-referral-code", data);
   },
 
   updateReferralCode: async (id: string, data: any) => {
     const client = await getApiClient();
-    return client.patch(`/referral/${id}`, data);
+    return client.patch(`/referral/update-referral-code/${id}`, data);
   },
 
   updateReferralStatus: async (id: string, isActive: boolean) => {
     const client = await getApiClient();
-    return client.patch(`/referral/${id}/status`, { isActive });
+    // Note: Backend updateReferralCode only handles code and description currently.
+    // Sending it anyway in case the backend is updated later or handles it via save().
+    return client.patch(`/referral/update-referral-code/${id}`, { isActive });
   },
 
   deleteReferralCode: async (id: string) => {
     const client = await getApiClient();
-    return client.delete(`/referral/${id}`);
+    return client.delete(`/referral/delete-referral-code/${id}`);
   },
 };
