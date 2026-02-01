@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
@@ -68,6 +68,19 @@ export default function ReferralPage() {
     queryKey: ["referral-codes", statusFilter],
     queryFn: () => referralAPI.getReferralCodes(statusFilter === "all" ? "" : statusFilter),
   });
+
+  const { data: getAppSetting, isLoading: appSettingLoading } = useQuery({
+    queryKey: ["app-setting"],
+    queryFn: () => appSettingsAPI.getAppSetting(),
+  });
+
+  useEffect(() => {
+    if (getAppSetting) {
+      setIsReferralSystemEnabled(getAppSetting.data.data.referralSystemEnabled);
+    }
+  }, [getAppSetting]);
+
+  // console.log(isReferralSystemEnabled)
 
   const referralCodes: ReferralCode[] = response?.data?.data || [];
 

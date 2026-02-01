@@ -294,4 +294,9 @@ export const appSettingsAPI = {
     const client = await getApiClient();
     return client.patch("/app-setting/toggle-referral-system");
   },
+
+  getAppSetting: async () => {
+    const client = await getApiClient();
+    return client.get("/app-setting/get-referral-setting");
+  },
 };
