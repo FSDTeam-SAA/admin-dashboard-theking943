@@ -60,9 +60,9 @@ export default function AppointmentsPage() {
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case "appoint":
-      case "confirmed":
+      case "accepted":
         return "bg-green-100 text-green-800";
-      case "reschedule":
+      case "completed":
         return "bg-yellow-100 text-yellow-800";
       case "cancelled":
         return "bg-red-100 text-red-800";
@@ -108,8 +108,8 @@ export default function AppointmentsPage() {
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="appoint">Confirmed</SelectItem>
-                  <SelectItem value="reschedule">Rescheduled</SelectItem>
+                  <SelectItem value="accepted">Accepted</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
                   <SelectItem value="cancelled">Cancelled</SelectItem>
                 </SelectContent>
               </Select>

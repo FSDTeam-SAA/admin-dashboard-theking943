@@ -88,17 +88,17 @@ export const notificationsAPI = {
     params.append("page", page.toString());
     params.append("limit", limit.toString());
     if (isRead !== undefined) params.append("isRead", isRead.toString());
-    return client.get(`/notifications?${params.toString()}`);
+    return client.get(`/notification?${params.toString()}`);
   },
 
   markAsRead: async (notificationId: string) => {
     const client = await getApiClient();
-    return client.patch(`/notifications/${notificationId}/read`);
+    return client.patch(`/notification/${notificationId}/read`);
   },
 
   markAllAsRead: async () => {
     const client = await getApiClient();
-    return client.patch("/notifications/read-all");
+    return client.patch("/notification/read-all");
   },
 };
 
@@ -285,5 +285,13 @@ export const referralAPI = {
   deleteReferralCode: async (id: string) => {
     const client = await getApiClient();
     return client.delete(`/referral/delete-referral-code/${id}`);
+  },
+};
+
+// App Settings APIs
+export const appSettingsAPI = {
+  toggleReferralSystem: async () => {
+    const client = await getApiClient();
+    return client.patch("/app-setting/toggle-referral-system");
   },
 };

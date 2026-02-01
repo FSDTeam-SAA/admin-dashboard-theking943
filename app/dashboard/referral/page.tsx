@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +30,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { referralAPI } from "@/lib/api-client";
+import { referralAPI, appSettingsAPI } from "@/lib/api-client";
 import { TableSkeleton } from "@/components/skeletons";
 import { toast } from "sonner";
 import {
@@ -58,6 +59,7 @@ export default function ReferralPage() {
   const [search, setSearch] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isReferralSystemEnabled, setIsReferralSystemEnabled] = useState(false);
   const [newCode, setNewCode] = useState({ code: "", description: "", isActive: true });
   const [editCode, setEditCode] = useState<ReferralCode | null>(null);
   const queryClient = useQueryClient();
@@ -128,6 +130,20 @@ export default function ReferralPage() {
     },
   });
 
+  const toggleSystemMutation = useMutation({
+    mutationFn: () => appSettingsAPI.toggleReferralSystem(),
+    onSuccess: (response) => {
+      // Assuming the API returns the new state, otherwise we just toggle local state
+      // If response.data.data is boolean, strict to that.
+      // For now, simple toggle
+      setIsReferralSystemEnabled((prev) => !prev);
+      toast.success("Referral system status updated");
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to update referral system status");
+    },
+  });
+
   const totalUses = (item: ReferralCode) =>
     typeof item.totalUses === "number" ? item.totalUses : item.timesUsed || 0;
 
@@ -170,7 +186,19 @@ export default function ReferralPage() {
               Create, activate, or deactivate referral codes and see total usage.
             </p>
           </div>
-          <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+          <div className="flex items-center gap-4">
+             <div className="flex items-center gap-2 bg-white p-2 rounded-lg border shadow-sm">
+              <Switch
+                id="referral-toggle"
+                checked={isReferralSystemEnabled}
+                onCheckedChange={() => toggleSystemMutation.mutate()}
+                disabled={toggleSystemMutation.isPending}
+              />
+              <Label htmlFor="referral-toggle" className="cursor-pointer">
+                {isReferralSystemEnabled ? "System Active" : "System Inactive"} 
+              </Label>
+            </div>
+            <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
             <DialogTrigger asChild>
               <Button className="bg-blue-600 hover:bg-blue-700">
                 <Plus className="h-4 w-4 mr-2" />
@@ -217,6 +245,7 @@ export default function ReferralPage() {
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         {/* Filters */}
