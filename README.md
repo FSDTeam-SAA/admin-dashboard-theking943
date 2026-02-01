@@ -12,6 +12,9 @@ A pixel-perfect, fully functional healthcare admin dashboard built with Next.js,
 - **Appointment Management**: Track all appointments with cancellation capability
 - **Earnings Tracking**: Monitor doctor-wise earnings and appointment history
 - **Category Management**: Add, edit, and manage medical specialties with status toggle
+- **Referral System**: Manage referral codes and toggle the referral system globally
+
+For more detailed technical information, please refer to [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md).
 
 ### 🎨 Design & UX
 - **Responsive Design**: Fully mobile-responsive with collapsible sidebar
