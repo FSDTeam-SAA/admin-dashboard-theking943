@@ -182,7 +182,14 @@ export default function EarningsPage() {
                     <TableCell className="text-slate-600 font-semibold">
                       {doc.appointments}
                     </TableCell>
-                    <TableCell className="font-bold text-slate-900">
+                    <TableCell className="font-bold text-slate-900 flex items-center gap-2 ">
+                      <Image
+                        src="/Algerian-dinar.png"
+                        alt="Dinar"
+                        width={32}
+                        height={32}
+                        className="h-6 w-6"
+                      />
                       ${doc.earnings.toFixed(2)}
                     </TableCell>
                     <TableCell>

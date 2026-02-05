@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,9 +31,10 @@ import { appointmentsAPI } from "@/lib/api-client";
 import { TableSkeleton } from "@/components/skeletons";
 import { toast } from "sonner";
 import { Search, Calendar, Clock } from "lucide-react";
-import { useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import Loading from "./loading";
+import Image from "next/image";
 
 export default function AppointmentsPage() {
   const [page, setPage] = useState(1);
@@ -39,7 +46,8 @@ export default function AppointmentsPage() {
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["appointments", page, search, status],
-    queryFn: () => appointmentsAPI.getAppointments(page, ITEMS_PER_PAGE, search, status),
+    queryFn: () =>
+      appointmentsAPI.getAppointments(page, ITEMS_PER_PAGE, search, status),
   });
 
   const cancelMutation = useMutation({
@@ -49,7 +57,9 @@ export default function AppointmentsPage() {
       toast.success("Appointment cancelled");
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to cancel appointment");
+      toast.error(
+        error.response?.data?.message || "Failed to cancel appointment",
+      );
     },
   });
 
@@ -78,8 +88,12 @@ export default function AppointmentsPage() {
       <div className="space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Appointment Management</h1>
-          <p className="text-gray-600 mt-2">View all doctor accepted patients</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Appointment Management
+          </h1>
+          <p className="text-gray-600 mt-2">
+            View all doctor accepted patients
+          </p>
         </div>
 
         {/* Filters */}
@@ -98,10 +112,13 @@ export default function AppointmentsPage() {
                   }}
                 />
               </div>
-              <Select value={status} onValueChange={(val) => {
-                setStatus(val);
-                setPage(1);
-              }}>
+              <Select
+                value={status}
+                onValueChange={(val) => {
+                  setStatus(val);
+                  setPage(1);
+                }}
+              >
                 <SelectTrigger className="w-full md:w-48">
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
@@ -121,7 +138,9 @@ export default function AppointmentsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Appointment's List</CardTitle>
-            <CardDescription>Showing {appointments.length} of {totalResults} results</CardDescription>
+            <CardDescription>
+              Showing {appointments.length} of {totalResults} results
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -147,37 +166,56 @@ export default function AppointmentsPage() {
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4 text-gray-400" />
                             <span className="text-sm font-medium">
-                              {new Date(appointment.date).toLocaleDateString()}
+                              {new Date(
+                                appointment.appointmentDate,
+                              ).toLocaleDateString()}
                             </span>
                           </div>
                         </TableCell>
                         <TableCell className="text-sm">
-                          {appointment.patientName || appointment.patient?.fullName || "N/A"}
+                          {appointment.patientName ||
+                            appointment.patient?.fullName ||
+                            "N/A"}
                         </TableCell>
                         <TableCell className="text-sm">
-                          {appointment.doctorName || appointment.doctor?.fullName || "N/A"}
+                          {appointment.doctorName ||
+                            appointment.doctor?.fullName ||
+                            "N/A"}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Clock className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm">{appointment.time || "N/A"}</span>
+                            <span className="text-sm">
+                              {appointment.time || "N/A"}
+                            </span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-sm font-medium">
-                          {appointment.fees?.amount || 0} {appointment.fees?.currency || "USD"}
+                        <TableCell className="text-sm font-medium flex items-center gap-2">
+                          <Image
+                            src="/Algerian-dinar.png"
+                            alt="Dinar"
+                            width={32}
+                            height={32}
+                            className="h-6 w-6"
+                          />
+                          {appointment.doctor?.fees?.amount || 0}{" "}
                         </TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(appointment.status)}>
-                            {appointment.status?.charAt(0).toUpperCase() + appointment.status?.slice(1) || "Pending"}
+                            {appointment.status?.charAt(0).toUpperCase() +
+                              appointment.status?.slice(1) || "Pending"}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {appointment.status?.toLowerCase() !== "cancelled" && (
+                          {appointment.status?.toLowerCase() !==
+                            "cancelled" && (
                             <Button
                               size="sm"
                               variant="outline"
                               className="text-red-600 hover:text-red-700 bg-transparent"
-                              onClick={() => cancelMutation.mutate(appointment._id)}
+                              onClick={() =>
+                                cancelMutation.mutate(appointment._id)
+                              }
                               disabled={cancelMutation.isPending}
                             >
                               Cancel
@@ -206,14 +244,14 @@ export default function AppointmentsPage() {
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                onClick={() => setPage(p => Math.max(1, p - 1))}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
               >
                 Previous
               </Button>
               <Button
                 variant="outline"
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
               >
                 Next

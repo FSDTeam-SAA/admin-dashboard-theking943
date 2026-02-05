@@ -225,7 +225,7 @@ export default function DoctorsPage() {
                         </TableCell>
                         <TableCell>
                           <Badge variant="secondary">
-                            {doctor.referralCode}
+                            {doctor.referralCode.code}
                           </Badge>
                         </TableCell>
                         <TableCell>
